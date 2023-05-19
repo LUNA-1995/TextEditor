@@ -1,0 +1,97 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.*;
+
+public class TextEditor extends JFrame implements ActionListener {
+    private JTextArea textArea;
+    private JFileChooser fileChooser;
+
+    public TextEditor() {
+        setTitle("Text Editor");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        // Create the text area
+        textArea = new JTextArea();
+        JScrollPane scrollPane = new JScrollPane(textArea);
+
+        // Create the menu bar
+        JMenuBar menuBar = new JMenuBar();
+        JMenu fileMenu = new JMenu("File");
+        JMenuItem openMenuItem = new JMenuItem("Open");
+        JMenuItem saveMenuItem = new JMenuItem("Save");
+
+        // Attach action listeners to menu items
+        openMenuItem.addActionListener(this);
+        saveMenuItem.addActionListener(this);
+
+        // Add menu items to the menu bar
+        fileMenu.add(openMenuItem);
+        fileMenu.add(saveMenuItem);
+        menuBar.add(fileMenu);
+
+        // Set the menu bar
+        setJMenuBar(menuBar);
+
+        // Add the scroll pane to the frame
+        add(scrollPane, BorderLayout.CENTER);
+
+        pack();
+        setVisible(true);
+
+        // Create the file chooser
+        fileChooser = new JFileChooser();
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getActionCommand().equals("Open")) {
+            int returnVal = fileChooser.showOpenDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                openFile(file);
+            }
+        } else if (e.getActionCommand().equals("Save")) {
+            int returnVal = fileChooser.showSaveDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                saveFile(file);
+            }
+        }
+    }
+
+    private void openFile(File file) {
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            String line;
+            StringBuilder content = new StringBuilder();
+            while ((line = reader.readLine()) != null) {
+                content.append(line).append("\n");
+            }
+            reader.close();
+            textArea.setText(content.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveFile(File file) {
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+            writer.write(textArea.getText());
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                new TextEditor();
+            }
+        });
+    }
+}
